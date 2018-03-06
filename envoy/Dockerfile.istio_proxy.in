@@ -1,0 +1,9 @@
+FROM istio/proxy:@ISTIO_VERSION@
+
+# Replace Istio's Envoy binary with Cilium's.
+ADD istio-envoy /usr/local/bin/envoy
+RUN \
+chgrp 1337 /usr/local/bin/envoy && \
+chmod 6755 /usr/local/bin/envoy
+
+ENTRYPOINT ["/usr/local/bin/pilot-agent"]
