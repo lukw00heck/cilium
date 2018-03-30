@@ -36,6 +36,9 @@ type EndpointPolicy struct {
 
 	// l4
 	L4 *L4Policy `json:"l4,omitempty"`
+
+	// The policy revision that created this endpoint policy
+	Revision int64 `json:"revision,omitempty"`
 }
 
 /* polymorph EndpointPolicy allowed-egress-identities false */
@@ -49,6 +52,8 @@ type EndpointPolicy struct {
 /* polymorph EndpointPolicy id false */
 
 /* polymorph EndpointPolicy l4 false */
+
+/* polymorph EndpointPolicy revision false */
 
 // Validate validates this endpoint policy
 func (m *EndpointPolicy) Validate(formats strfmt.Registry) error {
