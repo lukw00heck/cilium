@@ -6,6 +6,8 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"strconv"
+
 	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/go-openapi/errors"
@@ -37,6 +39,15 @@ type EndpointPolicy struct {
 	// l4
 	L4 *L4Policy `json:"l4,omitempty"`
 
+	// Whether policy enforcement is enabled (ingress, egress, both or none)
+	PolicyEnabled EndpointPolicyEnabled `json:"policy-enabled,omitempty"`
+
+	// The policy revision currently enforced in the proxy for this endpoint
+	ProxyPolicyRevision int64 `json:"proxy-policy-revision,omitempty"`
+
+	// Statistics of the proxy redirects configured for this endpoint
+	ProxyStatistics []*ProxyStatistics `json:"proxy-statistics"`
+
 	// The policy revision that created this endpoint policy
 	Revision int64 `json:"revision,omitempty"`
 }
@@ -52,6 +63,12 @@ type EndpointPolicy struct {
 /* polymorph EndpointPolicy id false */
 
 /* polymorph EndpointPolicy l4 false */
+
+/* polymorph EndpointPolicy policy-enabled false */
+
+/* polymorph EndpointPolicy proxy-policy-revision false */
+
+/* polymorph EndpointPolicy proxy-statistics false */
 
 /* polymorph EndpointPolicy revision false */
 
@@ -75,6 +92,16 @@ func (m *EndpointPolicy) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateL4(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validatePolicyEnabled(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateProxyStatistics(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -136,6 +163,49 @@ func (m *EndpointPolicy) validateL4(formats strfmt.Registry) error {
 			}
 			return err
 		}
+	}
+
+	return nil
+}
+
+func (m *EndpointPolicy) validatePolicyEnabled(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.PolicyEnabled) { // not required
+		return nil
+	}
+
+	if err := m.PolicyEnabled.Validate(formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("policy-enabled")
+		}
+		return err
+	}
+
+	return nil
+}
+
+func (m *EndpointPolicy) validateProxyStatistics(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.ProxyStatistics) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(m.ProxyStatistics); i++ {
+
+		if swag.IsZero(m.ProxyStatistics[i]) { // not required
+			continue
+		}
+
+		if m.ProxyStatistics[i] != nil {
+
+			if err := m.ProxyStatistics[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("proxy-statistics" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
 	}
 
 	return nil
